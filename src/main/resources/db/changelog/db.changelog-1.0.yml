@@ -1,0 +1,109 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2-create-table-releases
+      author: you
+      changes:
+        - createTable:
+            tableName: releases
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: status
+                  type: VARCHAR(40)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: release_date
+                  type: DATE
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_update_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+
+        # CHECK status constraint
+        - sql:
+            sql: |
+              ALTER TABLE releases
+              ADD CONSTRAINT chk_releases_status
+              CHECK (status IN (
+                'CREATED',
+                'IN_DEVELOPMENT',
+                'ON_DEV',
+                'QA_DONE_ON_DEV',
+                'ON_STAGING',
+                'QA_DONE_ON_STAGING',
+                'ON_PROD',
+                'DONE'
+              ));
+
+        # Indexes
+        - createIndex:
+            tableName: releases
+            indexName: idx_releases_status
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            tableName: releases
+            indexName: idx_releases_release_date
+            columns:
+              - column:
+                  name: release_date
+
+  # Trigger for last_update_at
+  - changeSet:
+      id: 3-trigger-last-update
+      author: you
+      preConditions:
+        - dbms:
+            type: postgresql
+        - onFail: MARK_RAN
+      changes:
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              CREATE OR REPLACE FUNCTION set_last_update_at()
+              RETURNS trigger
+              LANGUAGE plpgsql
+              AS $func$
+              BEGIN
+                NEW.last_update_at := NOW();
+                RETURN NEW;
+              END;
+              $func$;
+
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trg_releases_set_last_update_at ON releases;
+              CREATE TRIGGER trg_releases_set_last_update_at
+              BEFORE UPDATE ON releases
+              FOR EACH ROW
+              EXECUTE FUNCTION set_last_update_at();
+      rollback:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trg_releases_set_last_update_at ON releases;
+              DROP FUNCTION IF EXISTS set_last_update_at();
