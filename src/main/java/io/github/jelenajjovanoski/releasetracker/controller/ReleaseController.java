@@ -5,10 +5,11 @@ import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
 import io.github.jelenajjovanoski.releasetracker.service.ReleaseService;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -23,8 +24,12 @@ public class ReleaseController {
 
     @PostMapping
     public ResponseEntity<ReleaseResponse> create(@RequestBody @Valid ReleaseRequest r) {
-        ReleaseResponse created = releaseService.create(r);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        ReleaseResponse response = releaseService.create(r);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.id())
+                .toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/{id}")

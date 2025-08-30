@@ -27,11 +27,11 @@ public enum ReleaseStatus {
 
     public static ReleaseStatus fromLabel(String label) {
         for (ReleaseStatus status : values()) {
-            if (status.label.equalsIgnoreCase(label)) {
+            if (status.label.equals(label)) {
                 return status;
             }
         }
-        log.error("Unknown release status: {}", label);
+        log.error("Invalid release status received: {}", label);
         throw new InvalidStatusException(label);
     }
 }
