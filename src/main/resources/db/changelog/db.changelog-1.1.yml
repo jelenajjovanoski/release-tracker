@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4-drop-last-update-trigger
+      author: you
+      preConditions:
+        - dbms:
+            type: postgresql
+        - onFail: MARK_RAN
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trg_releases_set_last_update_at ON releases;
+              DROP FUNCTION IF EXISTS set_last_update_at();
+
+  - changeSet:
+      id: 5-drop-defaults-on-timestamps
+      author: you
+      changes:
+        - sql:
+            sql: |
+              ALTER TABLE releases
+                ALTER COLUMN created_at DROP DEFAULT,
+                ALTER COLUMN last_update_at DROP DEFAULT;
