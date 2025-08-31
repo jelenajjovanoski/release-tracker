@@ -83,4 +83,24 @@ public class ReleaseServiceImpl implements ReleaseService {
         Page<Release> page = repo.findAll(spec, pageableWithDefaultSort);
         return page.map(mapper::toResponse);
     }
+
+    @Override
+    public ReleaseResponse update(UUID id, ReleaseRequest request) {
+        Release entity = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Release not found: " + id));
+
+        if (!entity.getName().equals(request.name()) && repo.existsByName(request.name())) {
+            throw new NameAlreadyExistsException(request.name());
+        }
+        ReleaseStatus newStatus = ReleaseStatus.fromLabel(request.status());
+
+        entity.setName(request.name());
+        entity.setDescription(request.description());
+        entity.setStatus(newStatus);
+        entity.setReleaseDate(request.releaseDate());
+
+        Release saved = repo.save(entity);
+
+        return mapper.toResponse(saved);
+    }
 }

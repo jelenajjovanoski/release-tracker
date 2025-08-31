@@ -21,11 +21,11 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
 
+import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -73,18 +73,18 @@ public class ReleaseControllerIT {
         mockMvc.perform(get(API + "/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(RELEASE_NAME))
-                .andExpect(jsonPath("$.description").value(RELEASE_DESC))
-                .andExpect(jsonPath("$.status").value(RELEASE_STATUS));
+                .andExpect(jsonPath("$.name").value("Release 1.0"))
+                .andExpect(jsonPath("$.description").value("Initial drop"))
+                .andExpect(jsonPath("$.status").value("Created"));
     }
 
     @Test
     void createReleaseWithDuplicateName_returnsConflict() throws Exception {
-        performCreateRelease("Unique 1", "x", "Created", LocalDate.now().plusDays(1));
+        performCreatedRelease("Unique 1", "x", "Created", LocalDate.now().plusDays(1));
 
         mockMvc.perform(post(API)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(buildReleasePayload("Unique 1", "x", "Created", LocalDate.now().plusDays(2)))))
+                        .content(json(buildPayload("Unique 1", "x", "Created", LocalDate.now().plusDays(2)))))
                 .andExpect(status().isConflict());
     }
 
@@ -92,7 +92,7 @@ public class ReleaseControllerIT {
     void createWithInvalidStatus_returnsBadRequest() throws Exception {
         mockMvc.perform(post(API)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(buildReleasePayload("Bad status", "x", "On MARS", LocalDate.now().plusDays(1)))))
+                        .content(json(buildPayload("Bad status", "x", "On MARS", LocalDate.now().plusDays(1)))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -105,14 +105,14 @@ public class ReleaseControllerIT {
     @Test
     void createAndGetAll_sortedByLastUpdatedWithPagination() throws Exception {
 
-        performCreateRelease("Rel A", "desc A", "Created", LocalDate.now().plusDays(2));
+        performCreatedRelease("Rel A", "desc A", "Created", LocalDate.now().plusDays(2));
         Thread.sleep(5);
-        performCreateRelease("Rel B", "desc B", "Created", LocalDate.now().plusDays(3));
+        performCreatedRelease("Rel B", "desc B", "Created", LocalDate.now().plusDays(3));
 
         mockMvc.perform(get(API).param("page", "0").param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()", greaterThanOrEqualTo(2)))
-                .andExpect(jsonPath("$.content[0].name", anyOf(is("Rel B"), is(RELEASE_NAME))));
+                .andExpect(jsonPath("$.content[0].name", anyOf(is("Rel B"), is("Re"))));
 
         mockMvc.perform(get(API).param("page", "1").param("size", "1"))
                 .andExpect(status().isOk())
@@ -125,8 +125,8 @@ public class ReleaseControllerIT {
     @Test
     void createAndGetAll_withFilters_nameAndReleaseDateRange() throws Exception {
 
-        performCreateRelease("Rel Filter X", "f", "Created", LocalDate.of(2025, 9, 10));
-        performCreateRelease("Other", "f", "QA done on STAGING", LocalDate.of(2025, 10, 1));
+        performCreatedRelease("Rel Filter X", "f", "Created", LocalDate.of(2025, 9, 10));
+        performCreatedRelease("Other", "f", "QA done on STAGING", LocalDate.of(2025, 10, 1));
 
         mockMvc.perform(get(API)
                         .param("nameContains", "rel fil")
@@ -139,9 +139,58 @@ public class ReleaseControllerIT {
                 .andExpect(jsonPath("$.page.totalElements", is(1)));
     }
 
+    @Test
+    void updateWithValidRequest_returnsOkAndUpdatesFields() throws Exception {
+        UUID id = postRelease("Rel C", "Old", "Created", LocalDate.now().plusDays(1));
+
+        mockMvc.perform(put(API + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(buildPayload("Rel C", "New Desc", "On DEV", LocalDate.now().plusDays(2)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(id.toString())))
+                .andExpect(jsonPath("$.name", is("Rel C")))
+                .andExpect(jsonPath("$.description", is("New Desc")))
+                .andExpect(jsonPath("$.status", is("On DEV")));
+    }
+
+    @Test
+    void updateNonExisting_returnsNotFound() throws Exception {
+        UUID missing = UUID.randomUUID();
+        var updateRequest = new ReleaseRequest("Rel X", "Desc", "Created", LocalDate.now().plusDays(1));
+
+        mockMvc.perform(put(API + "/{id}", missing)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(updateRequest)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateWithDuplicateName_returnsConflict() throws Exception {
+        UUID id1 = postRelease("Rel D", "First", "Created", LocalDate.now().plusDays(1));
+        UUID id2 = postRelease("Rel E", "Second", "Created", LocalDate.now().plusDays(2));
+
+        ReleaseRequest updateRequest  = new ReleaseRequest("Rel D", "Second UPDATED", "On DEV", LocalDate.now().plusDays(3));
+
+        mockMvc.perform(put(API + "/{id}", id2)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(updateRequest)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void updateWithInvalidStatus_returnsBadRequest() throws Exception {
+        UUID id = postRelease("Rel F", "Desc", "Created", LocalDate.now().plusDays(1));
+
+        var req = new ReleaseRequest("Rel G", "Desc", "INVALID_STATUS", LocalDate.now().plusDays(1));
+
+        mockMvc.perform(put(API + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(req)))
+                .andExpect(status().isBadRequest());
+    }
 
 
-    private Map<String, String> buildReleasePayload(String name, String description, String status, LocalDate releaseDate) {
+    private Map<String, String> buildPayload(String name, String description, String status, LocalDate releaseDate) {
         return Map.of(
                 "name", name,
                 "description", description,
@@ -159,10 +208,18 @@ public class ReleaseControllerIT {
         );
     }
 
-    private MvcResult performCreateRelease(String name, String desc, String status, LocalDate date) throws Exception {
+    private UUID postRelease(String name, String desc, String status, LocalDate date) throws Exception {
+        String location = performCreatedRelease(name, desc, status, date)
+                .getResponse()
+                .getHeader("Location");
+        String idStr = location.substring(location.lastIndexOf('/') + 1);
+        return UUID.fromString(idStr);
+    }
+
+    private MvcResult performCreatedRelease(String name, String desc, String status, LocalDate date) throws Exception {
         return mockMvc.perform(post(API)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(buildReleasePayload(name, desc, status, date))))
+                        .content(json(buildPayload(name, desc, status, date))))
                 .andExpect(status().isCreated())
                 .andReturn();
     }

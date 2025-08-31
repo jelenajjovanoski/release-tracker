@@ -56,4 +56,10 @@ public class ReleaseController {
         Page<ReleaseResponse> result = releaseService.getAll(status, nameContains, releaseDateFrom, releaseDateTo, pageable);
         return ResponseEntity.ok(result);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ReleaseResponse> update(@PathVariable UUID id, @RequestBody @Valid ReleaseRequest request) {
+        ReleaseResponse updated = releaseService.update(id, request);
+        return ResponseEntity.ok(updated);
+    }
 }
