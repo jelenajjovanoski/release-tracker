@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Entity
@@ -32,13 +33,17 @@ public class Release {
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, columnDefinition = "timestamptz")
+    @Column(name = "created_at", nullable = false, columnDefinition = "timestamptz", updatable = false)
     private OffsetDateTime createdAt;
 
-    @UpdateTimestamp
     @Column(name = "last_update_at", nullable = false, columnDefinition = "timestamptz")
     private OffsetDateTime lastUpdateAt;
+
+    @PrePersist
+    void prePersist() {
+        if (createdAt == null) createdAt = OffsetDateTime.now(ZoneOffset.UTC);
+        if (lastUpdateAt == null) lastUpdateAt = createdAt;
+    }
 
     public Release() {}
 

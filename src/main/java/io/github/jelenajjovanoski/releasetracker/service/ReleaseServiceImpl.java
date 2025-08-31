@@ -15,13 +15,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static io.github.jelenajjovanoski.releasetracker.repository.ReleaseSpecifications.*;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class ReleaseServiceImpl implements ReleaseService {
 
     private static final Logger log = LoggerFactory.getLogger(ReleaseServiceImpl.class);
@@ -37,6 +41,7 @@ public class ReleaseServiceImpl implements ReleaseService {
         this.mapper = mapper;
     }
 
+    @Transactional
     @Override
     public ReleaseResponse create(ReleaseRequest r) {
         log.debug("Creating new release with name='{}'", r.name());
@@ -84,6 +89,7 @@ public class ReleaseServiceImpl implements ReleaseService {
         return page.map(mapper::toResponse);
     }
 
+    @Transactional
     @Override
     public ReleaseResponse update(UUID id, ReleaseRequest request) {
         Release entity = repo.findById(id)
@@ -98,6 +104,8 @@ public class ReleaseServiceImpl implements ReleaseService {
         entity.setDescription(request.description());
         entity.setStatus(newStatus);
         entity.setReleaseDate(request.releaseDate());
+
+        entity.setLastUpdateAt(OffsetDateTime.now(ZoneOffset.UTC));
 
         Release saved = repo.save(entity);
 
