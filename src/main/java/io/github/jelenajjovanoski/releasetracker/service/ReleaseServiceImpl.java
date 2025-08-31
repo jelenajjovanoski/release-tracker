@@ -6,13 +6,19 @@ import io.github.jelenajjovanoski.releasetracker.mapper.ReleaseMapper;
 import io.github.jelenajjovanoski.releasetracker.model.Release;
 import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
 import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
+import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
 import io.github.jelenajjovanoski.releasetracker.repository.ReleaseRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import static io.github.jelenajjovanoski.releasetracker.repository.ReleaseSpecifications.*;
+
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Service
@@ -51,5 +57,30 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .orElseThrow(() ->  new ResourceNotFoundException("Release with id " + id + " not found"));
         log.debug("Getting release with id={}", release);
         return mapper.toResponse(release);
+    }
+
+    @Override
+    public Page<ReleaseResponse> getAll(String statusLabel, String nameContains, LocalDate dateFrom, LocalDate dateTo, Pageable pageable) {
+        ReleaseStatus status = null;
+        if (statusLabel != null && !statusLabel.isBlank()) {
+            status = ReleaseStatus.fromLabel(statusLabel);
+        }
+
+        Specification<Release> spec = Specification.allOf(
+                hasStatus(status),
+                nameContains(nameContains),
+                releaseDateFrom(dateFrom),
+                releaseDateTo(dateTo)
+        );
+
+        Pageable pageableWithDefaultSort = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort().isSorted()
+                        ? pageable.getSort()
+                        : Sort.by(Sort.Direction.DESC, "lastUpdateAt"));
+
+        Page<Release> page = repo.findAll(spec, pageableWithDefaultSort);
+        return page.map(mapper::toResponse);
     }
 }

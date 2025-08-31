@@ -5,15 +5,20 @@ import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
 import io.github.jelenajjovanoski.releasetracker.service.ReleaseService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/releases")
+@RequestMapping("/api/v1/releases")
 public class ReleaseController {
 
     private final ReleaseService releaseService;
@@ -36,5 +41,19 @@ public class ReleaseController {
     public ResponseEntity<ReleaseResponse> get(@PathVariable UUID id) {
         ReleaseResponse response = releaseService.getById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ReleaseResponse>> getAll(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String nameContains,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate releaseDateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate releaseDateTo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ReleaseResponse> result = releaseService.getAll(status, nameContains, releaseDateFrom, releaseDateTo, pageable);
+        return ResponseEntity.ok(result);
     }
 }
