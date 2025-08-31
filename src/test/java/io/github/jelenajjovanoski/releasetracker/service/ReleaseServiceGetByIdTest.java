@@ -30,7 +30,7 @@ public class ReleaseServiceGetByIdTest {
     ReleaseServiceImpl service;
 
     @Test
-    void getById_whenExists_returnsResponse() {
+    void testGetById_whenExists() {
         final String name = "Release 1";
         final String desc = "Some desc";
         final String status = "Created";
@@ -64,7 +64,7 @@ public class ReleaseServiceGetByIdTest {
     }
 
     @Test
-    void getById_shouldThrow404_whenNotFound() {
+    void testGetById_whenNotFound() {
         UUID id = UUID.randomUUID();
         when(repo.findById(id)).thenReturn(Optional.empty());
 

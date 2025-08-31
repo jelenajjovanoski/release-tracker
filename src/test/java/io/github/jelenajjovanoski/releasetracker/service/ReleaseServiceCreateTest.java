@@ -33,18 +33,7 @@ public class ReleaseServiceCreateTest {
     ReleaseServiceImpl service;
 
     @Test
-    public void create_withExistingName_throwsException() {
-        ReleaseRequest req = new ReleaseRequest(
-                "Release 1", "Description", "Created", LocalDate.now());
-
-        when(repo.existsByName("Release 1")).thenReturn(true);
-
-        assertThrows(NameAlreadyExistsException.class, () -> service.create(req));
-        verify(repo, never()).save(any());
-    }
-
-    @Test
-    void create_withValidRequest_returnsSavedResponse() {
+    void testCreate_withValidRequest() {
         final String name = "Release 1";
         final String desc = "Some desc";
         final String status = "Created";
@@ -84,7 +73,18 @@ public class ReleaseServiceCreateTest {
     }
 
     @Test
-    void create_withInvalidStatus_throwsException() {
+    public void testCreate_withExistingName() {
+        ReleaseRequest req = new ReleaseRequest(
+                "Release 1", "Description", "Created", LocalDate.now());
+
+        when(repo.existsByName("Release 1")).thenReturn(true);
+
+        assertThrows(NameAlreadyExistsException.class, () -> service.create(req));
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void testCreate_withInvalidStatus() {
         ReleaseRequest req = new ReleaseRequest(
                 "Invalid status release", "Some description", "On MARS", LocalDate.now());
 

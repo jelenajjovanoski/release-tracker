@@ -45,7 +45,7 @@ public class ReleaseServicePutTest {
 
 
     @Test
-    void update_withValidRequest_updatesAndReturnsResponse() {
+    void testUpdate_withValidRequest() {
         UUID id = UUID.randomUUID();
         LocalDate releaseDate = LocalDate.now().plusDays(1);
 
@@ -88,7 +88,7 @@ public class ReleaseServicePutTest {
     }
 
     @Test
-    void update_duplicateName_throwsNameAlreadyExistsException() {
+    void testUpdate_withDuplicateName() {
         UUID id = UUID.randomUUID();
 
         Release existing = new Release();
@@ -110,7 +110,7 @@ public class ReleaseServicePutTest {
     }
 
     @Test
-    void update_invalidStatus_throwsInvalidStatusException() {
+    void testUpdate_withInvalidStatus() {
         UUID id = UUID.randomUUID();
 
         Release existing = new Release();

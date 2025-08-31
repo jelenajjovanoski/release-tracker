@@ -69,7 +69,7 @@ public class ReleaseServiceGetAllTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void getAll_withoutFilters() {
+    void testGetAll_withoutFilters() {
         Pageable reqPageable = PageRequest.of(0, 20);
         Page<Release> repoPage = new PageImpl<>(List.of(e1), reqPageable, 1);
 
@@ -86,7 +86,7 @@ public class ReleaseServiceGetAllTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void getAll_withStatusLabel_parsesStatusAndCallsRepo() {
+    void testGetAll_withValidStatus() {
 
         Pageable reqPageable = PageRequest.of(0, 10);
         Page<Release> repoPage = new PageImpl<>(List.of(e1), reqPageable, 1);
@@ -103,7 +103,7 @@ public class ReleaseServiceGetAllTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void getAll_withInvalidStatusLabel_throwsAndDoesNotCallRepo() {
+    void testGetAll_withInvalidStatus() {
 
         Pageable reqPageable = PageRequest.of(0, 20);
 
@@ -115,7 +115,7 @@ public class ReleaseServiceGetAllTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void getAll_withNameAndDateRange_filtersAndMaps() {
+    void testGetAll_withNameAndDateRange() {
 
         Pageable reqPageable = PageRequest.of(0, 10);
         when(repo.findAll(any(Specification.class), any(Pageable.class)))
