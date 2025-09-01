@@ -169,6 +169,25 @@ public class ReleaseControllerIT {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void testDeleteExistingRelease_returnsNoContent() throws Exception {
+        String id = postRelease("Rel to delete", "desc", "Created", LocalDate.now().plusDays(1));
+
+        mockMvc.perform(delete(API + "/{id}", id))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get(API + "/{id}", id))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDeleteNonExistingRelease_returnsNotFound() throws Exception {
+        mockMvc.perform(delete(API + "/{id}", UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+
+
     private String postRelease(String name, String desc, String status, LocalDate date) throws Exception {
         MvcResult res = mockMvc.perform(post(API)
                         .contentType(MediaType.APPLICATION_JSON)

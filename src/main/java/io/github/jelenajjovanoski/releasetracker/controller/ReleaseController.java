@@ -62,4 +62,10 @@ public class ReleaseController {
         ReleaseResponse updated = releaseService.update(id, request);
         return ResponseEntity.ok(updated);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        releaseService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

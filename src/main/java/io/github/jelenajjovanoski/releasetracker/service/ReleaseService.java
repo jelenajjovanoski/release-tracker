@@ -14,4 +14,5 @@ public interface ReleaseService {
     ReleaseResponse getById(UUID id);
     Page<ReleaseResponse> getAll(String statusLabel, String nameContains, LocalDate dateFrom, LocalDate dateTo, Pageable pageable);
     ReleaseResponse update(UUID id, ReleaseRequest request);
+    void delete(UUID id);
 }

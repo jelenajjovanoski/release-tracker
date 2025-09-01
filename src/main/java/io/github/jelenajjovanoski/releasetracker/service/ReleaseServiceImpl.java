@@ -60,7 +60,6 @@ public class ReleaseServiceImpl implements ReleaseService {
     public ReleaseResponse getById(UUID id) {
         Release release = repo.findById(id)
                 .orElseThrow(() ->  new ResourceNotFoundException("Release with id " + id + " not found"));
-        log.debug("Getting release with id={}", release);
         return mapper.toResponse(release);
     }
 
@@ -110,5 +109,14 @@ public class ReleaseServiceImpl implements ReleaseService {
         Release saved = repo.save(entity);
 
         return mapper.toResponse(saved);
+    }
+
+    @Transactional()
+    @Override
+    public void delete(UUID id) {
+        Release release = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Release not found with id: " + id));
+        repo.delete(release);
+        log.info("Deleted release with id={} and name='{}'", id, release.getName());
     }
 }
