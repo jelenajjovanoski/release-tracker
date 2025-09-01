@@ -3,12 +3,14 @@ package io.github.jelenajjovanoski.releasetracker.exception;
 import io.github.jelenajjovanoski.releasetracker.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +47,17 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidFormat(HttpMessageNotReadableException ex) {
+        if (ex.getCause() instanceof DateTimeParseException || ex.getMessage().contains("LocalDate")) {
+            return build(HttpStatus.BAD_REQUEST,
+                    "Invalid date format",
+                    "Release date must be in format yyyy-MM-dd");
+        }
+        return build(HttpStatus.BAD_REQUEST,
+                "Malformed request",
+                "Request body is not valid JSON or has invalid fields");
+    }
 
 
     // Helpers

@@ -85,6 +85,21 @@ public class ReleaseControllerIT {
     }
 
     @Test
+    void testCreateWithInvalidReleaseDateFormat_returnsBadRequest() throws Exception {
+        Map<String, String> invalidPayload = Map.of(
+                "name", "Invalid release date",
+                "description", "Some desc",
+                "status", "Created",
+                "releaseDate", "01-09-2025"
+        );
+
+        mockMvc.perform(post(API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(invalidPayload)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void testGetByNonExistingId_returnsNotFound() throws Exception {
         mockMvc.perform(get(API + "/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
