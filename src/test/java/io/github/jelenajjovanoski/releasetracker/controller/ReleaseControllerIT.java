@@ -2,6 +2,7 @@ package io.github.jelenajjovanoski.releasetracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
@@ -98,6 +100,23 @@ public class ReleaseControllerIT {
                         .content(json(invalidPayload)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void testCreateWithStatusDoneAndNoReleaseDate_setsToday() throws Exception {
+
+        MvcResult res = mockMvc.perform(post(API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(payload("Release done", "Some desc", ReleaseStatus.DONE.getLabel()))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value(ReleaseStatus.DONE.getLabel()))
+                .andExpect(jsonPath("$.releaseDate").exists())
+                .andReturn();
+
+        String body = res.getResponse().getContentAsString();
+        String dateStr = JsonPath.read(body, "$.releaseDate");
+        assertEquals(LocalDate.now(), LocalDate.parse(dateStr));
+    }
+
 
     @Test
     void testGetByNonExistingId_returnsNotFound() throws Exception {
@@ -185,6 +204,24 @@ public class ReleaseControllerIT {
     }
 
     @Test
+    void testUpdateWithStatusDoneAndNoReleaseDate_setsToday() throws Exception {
+        String id = postRelease("Rel update ", "Desc", ReleaseStatus.CREATED.getLabel());
+
+        MvcResult updateRes = mockMvc.perform(put(API + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(payload("Rel update ", "Desc", ReleaseStatus.DONE.getLabel()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("Done"))
+                .andExpect(jsonPath("$.releaseDate").exists())
+                .andReturn();
+
+        String updatedBody = updateRes.getResponse().getContentAsString();
+        String dateStr = JsonPath.read(updatedBody, "$.releaseDate");
+        assertEquals(LocalDate.now(), LocalDate.parse(dateStr));
+    }
+
+
+    @Test
     void testDeleteExistingRelease_returnsNoContent() throws Exception {
         String id = postRelease("Rel to delete", "desc", "Created", LocalDate.now().plusDays(1));
 
@@ -216,12 +253,33 @@ public class ReleaseControllerIT {
         return JsonPath.read(res.getResponse().getContentAsString(), "$.id");
     }
 
+    private String postRelease(String name, String desc, String status) throws Exception {
+        MvcResult res = mockMvc.perform(post(API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(payload(name, desc, status))))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.lastUpdateAt").exists())
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn();
+
+        return JsonPath.read(res.getResponse().getContentAsString(), "$.id");
+    }
+
     private Map<String, String> payload(String name, String description, String status, LocalDate releaseDate) {
         return Map.of(
                 "name", name,
                 "description", description,
                 "status", status,
                 "releaseDate", releaseDate.toString()
+        );
+    }
+
+    private Map<String, String> payload(String name, String description, String status) {
+        return Map.of(
+                "name", name,
+                "description", description,
+                "status", status
         );
     }
 

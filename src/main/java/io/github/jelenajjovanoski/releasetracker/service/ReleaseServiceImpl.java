@@ -50,6 +50,11 @@ public class ReleaseServiceImpl implements ReleaseService {
             throw new NameAlreadyExistsException(r.name());
         }
         Release entity = mapper.toEntity(r);
+
+        if (entity.getStatus() == ReleaseStatus.DONE && entity.getReleaseDate() == null) {
+            entity.setReleaseDate(LocalDate.now());
+        }
+
         Release saved = repo.save(entity);
 
         log.info("Release created with id={} and status={}", saved.getId(), saved.getStatus());
@@ -102,7 +107,12 @@ public class ReleaseServiceImpl implements ReleaseService {
         entity.setName(request.name());
         entity.setDescription(request.description());
         entity.setStatus(newStatus);
-        entity.setReleaseDate(request.releaseDate());
+
+        LocalDate effectiveDate = request.releaseDate() != null ? request.releaseDate() : entity.getReleaseDate();
+        if (newStatus == ReleaseStatus.DONE && effectiveDate == null) {
+            effectiveDate = LocalDate.now();
+        }
+        entity.setReleaseDate(effectiveDate);
 
         entity.setLastUpdateAt(OffsetDateTime.now(ZoneOffset.UTC));
 
