@@ -3,6 +3,8 @@ package io.github.jelenajjovanoski.releasetracker.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
+import io.github.jelenajjovanoski.releasetracker.repository.ReleaseRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,12 @@ public class ReleaseControllerIT {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    ReleaseRepository repo;
+
+    @AfterEach
+    void cleanup() { repo.deleteAll(); }
 
     private static final String API = "/api/v1/releases";
 
