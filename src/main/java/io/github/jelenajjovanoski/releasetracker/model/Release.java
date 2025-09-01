@@ -33,10 +33,10 @@ public class Release {
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
-    @Column(name = "created_at", nullable = false, columnDefinition = "timestamptz", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "last_update_at", nullable = false, columnDefinition = "timestamptz")
+    @Column(name = "last_update_at", nullable = false)
     private OffsetDateTime lastUpdateAt;
 
     @PrePersist

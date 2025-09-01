@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: release-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-reltrack}
+      POSTGRES_USER: ${POSTGRES_USER:-reltrack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reltrack}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reltrack} -d ${POSTGRES_DB:-reltrack}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: release-tracker-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-reltrack}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-reltrack}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-reltrack}
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+
+volumes:
+  pg_data:

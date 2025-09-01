@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true
+springdoc:
+  api-docs.enabled: false
+  swagger-ui.enabled: false
