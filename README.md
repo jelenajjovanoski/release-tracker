@@ -9,9 +9,9 @@ It provides endpoints to create, update, delete, and retrieve releases with vali
 
 - POST create a new release
 - GET list and filter releases (by name, status, release date range)
-- GET single release by ID
+- GET get a single release by ID
 - PUT update existing release
-- DELETE Delete a release
+- DELETE delete a release
 - Validation (unique release name, valid statuses, release date ≥ today)
 - Swagger/OpenAPI documentation
 
