@@ -1,8 +1,9 @@
 package io.github.jelenajjovanoski.releasetracker.model;
 
-import io.github.jelenajjovanoski.releasetracker.exception.InvalidStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.jelenajjovanoski.releasetracker.exception.InvalidStatusException;
 
 public enum ReleaseStatus {
     CREATED("Created"),

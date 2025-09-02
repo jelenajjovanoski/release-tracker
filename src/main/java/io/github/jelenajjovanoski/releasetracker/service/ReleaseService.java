@@ -1,12 +1,13 @@
 package io.github.jelenajjovanoski.releasetracker.service;
 
-import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
-import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
+import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
 
 public interface ReleaseService {
 

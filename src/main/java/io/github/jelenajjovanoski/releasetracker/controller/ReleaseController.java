@@ -1,10 +1,11 @@
 package io.github.jelenajjovanoski.releasetracker.controller;
 
-import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
-import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
-import io.github.jelenajjovanoski.releasetracker.service.ReleaseService;
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.UUID;
 
 import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,9 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.UUID;
+import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
+import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
+import io.github.jelenajjovanoski.releasetracker.service.ReleaseService;
 
 @RestController
 @RequestMapping("/api/v1/releases")

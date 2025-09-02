@@ -1,8 +1,9 @@
 package io.github.jelenajjovanoski.releasetracker.repository;
 
+import org.springframework.data.jpa.domain.Specification;
+
 import io.github.jelenajjovanoski.releasetracker.model.Release;
 import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 

@@ -1,5 +1,21 @@
 package io.github.jelenajjovanoski.releasetracker.service;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.UUID;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.github.jelenajjovanoski.releasetracker.exception.NameAlreadyExistsException;
 import io.github.jelenajjovanoski.releasetracker.exception.ResourceNotFoundException;
 import io.github.jelenajjovanoski.releasetracker.mapper.ReleaseMapper;
@@ -8,21 +24,8 @@ import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
 import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
 import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
 import io.github.jelenajjovanoski.releasetracker.repository.ReleaseRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import static io.github.jelenajjovanoski.releasetracker.repository.ReleaseSpecifications.*;
-
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)

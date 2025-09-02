@@ -1,5 +1,14 @@
 package io.github.jelenajjovanoski.releasetracker.service;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
 import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
 import io.github.jelenajjovanoski.releasetracker.exception.InvalidStatusException;
@@ -8,14 +17,6 @@ import io.github.jelenajjovanoski.releasetracker.mapper.ReleaseMapper;
 import io.github.jelenajjovanoski.releasetracker.model.Release;
 import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
 import io.github.jelenajjovanoski.releasetracker.repository.ReleaseRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;

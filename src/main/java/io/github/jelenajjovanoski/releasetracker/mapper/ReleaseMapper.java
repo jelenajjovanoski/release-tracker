@@ -1,10 +1,11 @@
 package io.github.jelenajjovanoski.releasetracker.mapper;
 
+import org.springframework.stereotype.Component;
+
 import io.github.jelenajjovanoski.releasetracker.model.Release;
 import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
 import io.github.jelenajjovanoski.releasetracker.dto.ReleaseRequest;
 import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ReleaseMapper {

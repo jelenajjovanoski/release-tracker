@@ -1,7 +1,7 @@
 package io.github.jelenajjovanoski.releasetracker.dto;
 
-import java.time.OffsetDateTime;
 import java.util.Map;
+import java.time.OffsetDateTime;
 
 public record ApiErrorResponse(
         OffsetDateTime timestamp,

@@ -1,19 +1,20 @@
 package io.github.jelenajjovanoski.releasetracker.service;
 
-import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
-import io.github.jelenajjovanoski.releasetracker.exception.ResourceNotFoundException;
-import io.github.jelenajjovanoski.releasetracker.mapper.ReleaseMapper;
-import io.github.jelenajjovanoski.releasetracker.model.Release;
-import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
-import io.github.jelenajjovanoski.releasetracker.repository.ReleaseRepository;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-import java.util.UUID;
+import io.github.jelenajjovanoski.releasetracker.dto.ReleaseResponse;
+import io.github.jelenajjovanoski.releasetracker.exception.ResourceNotFoundException;
+import io.github.jelenajjovanoski.releasetracker.mapper.ReleaseMapper;
+import io.github.jelenajjovanoski.releasetracker.model.Release;
+import io.github.jelenajjovanoski.releasetracker.model.ReleaseStatus;
+import io.github.jelenajjovanoski.releasetracker.repository.ReleaseRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
