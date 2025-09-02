@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6-add-version-column-to-releases
+      author: jelena
+      changes:
+        - addColumn:
+            tableName: releases
+            columns:
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false

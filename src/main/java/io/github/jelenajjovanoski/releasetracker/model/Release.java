@@ -35,6 +35,10 @@ public class Release {
     @Column(name = "last_update_at", nullable = false)
     private OffsetDateTime lastUpdateAt;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) createdAt = OffsetDateTime.now(ZoneOffset.UTC);
