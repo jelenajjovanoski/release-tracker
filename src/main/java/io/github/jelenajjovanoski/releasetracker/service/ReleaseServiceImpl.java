@@ -44,9 +44,10 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Transactional
     @Override
     public ReleaseResponse create(ReleaseRequest r) {
-        log.debug("Creating new release with name='{}'", r.name());
+        long t0 = System.nanoTime();
+        log.debug("Create called release name='{}'", r.name());
         if (repo.existsByName(r.name())) {
-            log.warn("Attempt to create release with duplicate name {}", r.name());
+            log.warn("Create blocked: release name already exists name='{}'", r.name());
             throw new NameAlreadyExistsException(r.name());
         }
         Release entity = mapper.toEntity(r);
@@ -57,19 +58,27 @@ public class ReleaseServiceImpl implements ReleaseService {
 
         Release saved = repo.save(entity);
 
-        log.info("Release created with id={} and status={}", saved.getId(), saved.getStatus());
+        log.info("Release created id={} name='{}' status={}", saved.getId(), saved.getName(), saved.getStatus());
+        log.debug("Create finished id={} durationMs={}", saved.getId(), (System.nanoTime() - t0) / 1_000_000);
         return mapper.toResponse(saved);
     }
 
     @Override
     public ReleaseResponse getById(UUID id) {
+        long t0 = System.nanoTime();
+        log.debug("GetById called id={}", id);
         Release release = repo.findById(id)
                 .orElseThrow(() ->  new ResourceNotFoundException("Release with id " + id + " not found"));
+        log.debug("GetById success id={} status={} durationMs={}", id, release.getStatus(), (System.nanoTime() - t0) / 1_000_000);
         return mapper.toResponse(release);
     }
 
     @Override
     public Page<ReleaseResponse> getAll(String statusLabel, String nameContains, LocalDate dateFrom, LocalDate dateTo, Pageable pageable) {
+        long t0 = System.nanoTime();
+        log.debug("List called filters={status:'{}', nameContains:'{}', dateFrom:{}, dateTo:{}} page={} size={}",
+                statusLabel, nameContains, dateFrom, dateTo, pageable.getPageNumber(), pageable.getPageSize());
+
         ReleaseStatus status = null;
         if (statusLabel != null && !statusLabel.isBlank()) {
             status = ReleaseStatus.fromLabel(statusLabel);
@@ -90,16 +99,24 @@ public class ReleaseServiceImpl implements ReleaseService {
                         : Sort.by(Sort.Direction.DESC, "lastUpdateAt"));
 
         Page<Release> page = repo.findAll(spec, pageableWithDefaultSort);
+        log.debug("List finished items={} total={} durationMs={}",
+                page.getNumberOfElements(), page.getTotalElements(), (System.nanoTime() - t0) / 1_000_000);
         return page.map(mapper::toResponse);
     }
 
     @Transactional
     @Override
     public ReleaseResponse update(UUID id, ReleaseRequest request) {
+        long t0 = System.nanoTime();
+        log.debug("Update called id={} name='{}' statusLabel='{}'", id, request.name(), request.status());
+
         Release entity = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Release not found: " + id));
+                .orElseThrow(() ->  new ResourceNotFoundException("Release not found: " + id));
+
+        ReleaseStatus oldStatus = entity.getStatus();
 
         if (!entity.getName().equals(request.name()) && repo.existsByName(request.name())) {
+            log.warn("Update blocked: duplicate release name id={} newName='{}'", id, request.name());
             throw new NameAlreadyExistsException(request.name());
         }
         ReleaseStatus newStatus = ReleaseStatus.fromLabel(request.status());
@@ -117,16 +134,20 @@ public class ReleaseServiceImpl implements ReleaseService {
         entity.setLastUpdateAt(OffsetDateTime.now(ZoneOffset.UTC));
 
         Release saved = repo.save(entity);
-
+        log.info("Release updated id={} name='{}' status:{}->{}", id, saved.getName(), oldStatus, saved.getStatus());
+        log.debug("Update finished id={} durationMs={}", id, (System.nanoTime() - t0) / 1_000_000);
         return mapper.toResponse(saved);
     }
 
     @Transactional()
     @Override
     public void delete(UUID id) {
+        long t0 = System.nanoTime();
+        log.debug("Delete called id={}", id);
         Release release = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Release not found with id: " + id));
         repo.delete(release);
-        log.info("Deleted release with id={} and name='{}'", id, release.getName());
+        log.info("Release deleted id={} name='{}'", id, release.getName());
+        log.debug("Delete finished id={} durationMs={}", id, (System.nanoTime() - t0) / 1_000_000);
     }
 }

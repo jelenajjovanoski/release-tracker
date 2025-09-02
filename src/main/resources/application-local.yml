@@ -9,3 +9,7 @@ spring:
       ddl-auto: create-drop
   liquibase:
     enabled: false
+logging:
+  level:
+    root: INFO
+    io.github.jelenajjovanoski: DEBUG

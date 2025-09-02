@@ -31,7 +31,6 @@ public enum ReleaseStatus {
                 return status;
             }
         }
-        log.error("Invalid release status received: {}", label);
         throw new InvalidStatusException(label);
     }
 }
