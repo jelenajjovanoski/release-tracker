@@ -113,7 +113,7 @@ http://localhost:8080/v3/api-docs
 ### Run all tests (unit + integration)
 Using Maven Wrapper:
 ```bash
-./mvnw clean install
+./mvnw verify
 ```
 Or, if Maven is installed locally:
 ```bash
