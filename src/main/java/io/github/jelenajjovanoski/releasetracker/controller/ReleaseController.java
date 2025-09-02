@@ -29,8 +29,8 @@ public class ReleaseController {
     }
 
     @PostMapping
-    public ResponseEntity<ReleaseResponse> create(@RequestBody @Valid ReleaseRequest r) {
-        ReleaseResponse response = releaseService.create(r);
+    public ResponseEntity<ReleaseResponse> create(@RequestBody @Valid ReleaseRequest request) {
+        ReleaseResponse response = releaseService.create(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(response.id())

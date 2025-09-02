@@ -66,7 +66,7 @@ public class ReleaseControllerIT {
     private static final String API = "/api/v1/releases";
 
     @Test
-    void testCreateAndGetById_returnsCreatedRelease() throws Exception {
+    void getById_whenCreated_shouldReturnCreatedRelease() throws Exception {
 
         String id = postRelease("Release 1.0", "Initial drop", "Created", LocalDate.now().plusDays(1));
 
@@ -81,7 +81,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testCreateWithDuplicateName_returnsConflict() throws Exception {
+    void create_whenDuplicateName_shouldReturnConflict() throws Exception {
         postRelease("Unique 1", "x", "Created", LocalDate.now().plusDays(1));
 
         mockMvc.perform(post(API)
@@ -91,7 +91,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testCreateWithInvalidStatus_returnsBadRequest() throws Exception {
+    void create_whenInvalidStatus_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(post(API)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(payload("Bad status", "x", "On MARS", LocalDate.now().plusDays(1)))))
@@ -99,7 +99,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testCreateWithInvalidReleaseDateFormat_returnsBadRequest() throws Exception {
+    void create_whenInvalidReleaseDateFormat_shouldReturnBadRequest() throws Exception {
         Map<String, String> invalidPayload = Map.of(
                 "name", "Invalid release date",
                 "description", "Some desc",
@@ -114,7 +114,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testCreateWithStatusDoneAndNoReleaseDate_setsToday() throws Exception {
+    void create_whenStatusDoneAndNoReleaseDate_shouldSetToday() throws Exception {
 
         MvcResult res = mockMvc.perform(post(API)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -131,13 +131,13 @@ public class ReleaseControllerIT {
 
 
     @Test
-    void testGetByNonExistingId_returnsNotFound() throws Exception {
+    void getById_whenNonExisting_shouldReturnNotFound() throws Exception {
         mockMvc.perform(get(API + "/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void testGetAll_sortedByLastUpdatedWithPagination() throws Exception {
+    void list_whenNoSortProvided_shouldSortByLastUpdatedAndSupportPagination() throws Exception {
         postRelease("Rel A", "desc A", "Created", LocalDate.now().plusDays(2));
         Thread.sleep(5);
         postRelease("Rel B", "desc B", "Created", LocalDate.now().plusDays(3));
@@ -156,7 +156,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testGetAll_withFilters_nameAndReleaseDateRange() throws Exception {
+    void list_whenNameContainsAndDateInRange_shouldReturnFilteredPage() throws Exception {
         postRelease("Rel Filter X", "f", "Created", LocalDate.of(2025, 9, 10));
         postRelease("Other", "f", "QA done on STAGING", LocalDate.of(2025, 10, 1));
 
@@ -172,7 +172,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testUpdateWithValidRequest_returnsOkAndUpdatesFields() throws Exception {
+    void update_whenValidRequest_shouldUpdateFieldsAndReturnOk() throws Exception {
         String id = postRelease("Rel C", "Old", "Created", LocalDate.now().plusDays(1));
 
         mockMvc.perform(put(API + "/{id}", id)
@@ -186,7 +186,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testUpdateNonExisting_returnsNotFound() throws Exception {
+    void update_whenNonExistingId_shouldReturnNotFound() throws Exception {
         mockMvc.perform(put(API + "/{id}", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(payload("Rel X", "Desc", "Created", LocalDate.now().plusDays(1)))))
@@ -194,7 +194,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testUpdateWithDuplicateName_returnsConflict() throws Exception {
+    void update_whenDuplicateName_shouldReturnConflict() throws Exception {
         String id1 = postRelease("Rel D", "First", "Created", LocalDate.now().plusDays(1));
         String id2 = postRelease("Rel E", "Second", "Created", LocalDate.now().plusDays(2));
 
@@ -206,7 +206,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testUpdateWithInvalidStatus_returnsBadRequest() throws Exception {
+    void update_whenInvalidStatus_shouldReturnBadRequest() throws Exception {
         String id = postRelease("Rel F", "Desc", "Created", LocalDate.now().plusDays(1));
 
         mockMvc.perform(put(API + "/{id}", id)
@@ -216,7 +216,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testUpdateWithStatusDoneAndNoReleaseDate_setsToday() throws Exception {
+    void update_whenStatusDoneAndNoReleaseDate_shouldSetToday() throws Exception {
         String id = postRelease("Rel update ", "Desc", ReleaseStatus.CREATED.getLabel());
 
         MvcResult updateRes = mockMvc.perform(put(API + "/{id}", id)
@@ -234,7 +234,7 @@ public class ReleaseControllerIT {
 
 
     @Test
-    void testDeleteExistingRelease_returnsNoContent() throws Exception {
+    void delete_whenExisting_shouldReturnNoContentAndResourceGone() throws Exception {
         String id = postRelease("Rel to delete", "desc", "Created", LocalDate.now().plusDays(1));
 
         mockMvc.perform(delete(API + "/{id}", id))
@@ -245,7 +245,7 @@ public class ReleaseControllerIT {
     }
 
     @Test
-    void testDeleteNonExistingRelease_returnsNotFound() throws Exception {
+    void delete_whenNonExisting_shouldReturnNotFound() throws Exception {
         mockMvc.perform(delete(API + "/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
